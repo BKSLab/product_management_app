@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+
+    <title>{{ context.title }}</title>
+  </head>
+  <body>
+    
+    <!-- Модальное окно для сообщения о результате выполнения операций с данными -->
+    <div class="modal fade" id="test-flash" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-body p-2" id="flashes">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              {% for message in messages %}
+              <p>{{ message }}</p>
+              {% endfor %}
+            {% endif %}
+            {% endwith %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">ок</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для добавления товара на склад -->
+    <div class="modal fade" id="add_product_to_warehouse" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Добавление товара на склад</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form method="post" id="inventory">
+              <div class="form-group select">
+                <label for="exampleFormControlSelect1">Выберите локацию</label>
+                <select class="form-control" id="exampleFormControlSelect1" name="location_info" required>
+                  {% for location in context.result_location %}
+                    <option>{{ location.id }} - {{ location.name }}</option>
+                    {% endfor %}
+                </select>
+              </div>
+              
+              <div class="form-group input">
+                <label for="quantity" class="col-form-label">Количество товара</label>
+                <input type="number" min="1" class="form-control" id="quantity" name="quantity" placeholder="1" required>
+              </div>
+             
+              <div class="modal-footer">
+                <input type="hidden" class="hidden-input" name="product_id" value="">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary" data-target="#add_product_to_warehouse">Добавить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для добавления нового товара -->
+    <div class="modal fade" id="add_new_product" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              Добавление нового товара
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            
+            <form method="post" id="product">
+              <div class="form-group">
+                
+                <label for="product-name" class="col-form-label">Наименование товара</label>
+                <input type="text" class="form-control" id="product-name" name="product_name" placeholder="введите наименование товара" required>
+
+                <label for="product-description" class="col-form-label">Описание товара</label>
+                <input type="text" class="form-control" id="product-description" name="product_description" placeholder="введите описание товара" required>
+
+                <label for="product-price" class="col-form-label">Цена за единицу товара</label>
+                <input type="text" min="0" class="form-control" id="product-price" name="product_price" placeholder="0" required>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary" data-target="#add_new_product">Добавить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для добавления новой локации -->
+    <div class="modal fade" id="add_new_location" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              Добавление новой локации
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            
+            <form method="post">
+              <div class="form-group">
+                <label for="Location-name" class="col-form-label">Наименование локации</label>
+                <input type="text" class="form-control" id="Location-name" name="location" placeholder="введите наименование локации" required>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary" data-target="#add_new_location">Добавить</button>
+              </div>
+            </form>      
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для удаления товара со склада -->
+    <div class="modal fade" id="del_product_to_warehouse" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Удаление товара со склада</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form method="post" id="del-inventory">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" required>
+                <label class="form-check-label" for="defaultCheck1">
+                  Вы действительно хотите удалить товар со склада?
+                </label>
+                <div class="modal-footer">
+                  <input type="hidden" class="hidden-input" name="product_info" value="">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                  <button type="submit" class="btn btn-danger" data-target="#del_product_to_warehouse">Удалить</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для изменения количества товара на складе-->
+    <div class="modal fade" id="change_quantity_products" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              Изменение количества товара на складе
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+        <div class="modal-body">
+          <form method="post" id="change-quantity">
+            <div class="form-group">
+              <label for="quantity" class="col-form-label">Новое количество товара</label>
+              <input type="number" min="0" class="form-control" id="quantity" name="new_quantity"  placeholder="0" required>
+            </div>
+              <div class="modal-footer">
+                <input type="hidden" class="hidden-input" name="product_info" value="">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary" data-target="#change_quantity_products">Изменить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <h1>{{ context.title }}</h1>
+    <div>
+      <div style="float: left;">
+        <button type="button" class="btn btn-outline-secondary" aria-pressed="true" data-toggle="modal" data-target="#add_new_product">Добавить новый товар</button>
+      </div>
+      <div style="float: left;">
+        <button type="button" class="btn btn-outline-secondary" aria-pressed="true" data-toggle="modal" data-target="#add_new_location">Добавить новую локацию</button>
+      </div>
+      <div style="float: left;">
+        <form method="post" id="search" class="form-inline">
+          <div class="form-group mb-2">
+            <input type="text" class="form-control" id="search-button" name="search_word"  placeholder="введите полное или частичное название товара" required>
+          </div>
+          <button type="submit" class="btn btn-outline-secondary" >Показать</button>      
+        </form>
+      </div>
+    </div>
+  
+    <form method="post">
+      <div class="form-row align-items-center">
+        <div class="col-auto my-1">
+          <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" name="sort">
+            <option selected>выберите вариант сортировки</option>
+            <option value="1">по цене</option>
+          </select>
+        </div>
+    
+        <div class="col-auto my-1">
+          <button type="submit" class="btn btn-outline-secondary" >сортировать</button>
+        </div>
+      </div>
+    </form>
+  
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Наименование товара</th>
+          <th scope="col">Описание товара</th>
+          <th scope="col">Цена за единицу товара</th>
+          <th scope="col">Место хранения</th>
+          <th scope="col">Количество</th>
+          <th scope="col">Действие</th>
+        </tr>
+      </thead>
+      {% for product in context.result %}
+      <tbody>
+        <tr>
+          <td>{{ product.name }}</td>
+          <td>{{ product.description }}</td>
+          <td>{{ product.price}}</td>
+          {% if product.inventories %}
+          <td>{{ product.inventories.0.locations.name }}</td>
+          <td>
+            <button type="button" class="btn btn-link" data-info="{{ product.id }}_{{product.inventories.0.location_id}}" data-toggle="modal" data-target="#change_quantity_products">{{ product.inventories.0.quantity }}</button>
+          </td>
+          {% else %}
+          <td>Товар не на складе</td>
+          <td>Товар не на складе</td>
+          {% endif %}
+          <td>
+            {% if product.inventories %}
+            <button type="button" class="btn btn-outline-danger btn-sm" data-info="{{ product.id }}_{{product.inventories.0.location_id}}" data-toggle="modal" data-target="#del_product_to_warehouse">Удалить со склада</button>
+            {% else %}
+            <button type="button" class="btn btn-outline-success btn-sm" data-id={{ product.id }} data-toggle="modal" data-target="#add_product_to_warehouse">Добавить на склад</button>
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+      {% endfor %}
+    </table>
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script src="static/js/script.js"></script>
+    <script src="static/js/script_form.js"></script>
+    <script src="static/js/script_transit_data.js"></script>
+  </body>
+</html>
