@@ -14,7 +14,7 @@ from form_validation.form_validation import (
     validation_inventory,
     validation_location,
     validation_product,
-    validation_product_and_location_id,
+    validation_inventory_id,
     validation_quantity,
 )
 
@@ -74,14 +74,14 @@ def processing_request_add_product_to_inventory(
     Обработка запроса пользователя на добавление
     товара на склад в конкретной локации.
     """
-    location_info = form_data.get('location_info')
+    location_id = form_data.get('location_id')
     quantity = request.form.get('quantity')
     product_id = request.form.get('product_id')
-    result = validation_inventory(location_info, quantity, product_id)
+    result = validation_inventory(location_id, quantity, product_id)
     if result:
         product_instance = get_object_by_id(model=Product, id=int(product_id))
         location_instance = get_object_by_id(
-            model=Location, id=int(location_info.split()[0])
+            model=Location, id=int(location_id)
         )
         if product_instance and location_instance:
             query_result = add_product_to_inventory(
@@ -116,12 +116,10 @@ def processing_request_del_product_from_inventory(
     Обработка запроса пользователя на удаление товара со
     склада в конкретной локации.
     """
-    product_info = form_data.get('product_info').split('_')
-    result = validation_product_and_location_id(product_info)
+    inventory_id = form_data.get('inventory_id')
+    result = validation_inventory_id(inventory_id)
     if result:
-        product_id = int(product_info[0])
-        location_id = int(product_info[1])
-        query_result = del_product_from_inventory(product_id, location_id)
+        query_result = del_product_from_inventory(inventory_id)
         if query_result.get('status'):
             flash('Товар успешно удален со склада')
         else:
@@ -147,11 +145,9 @@ def processing_request_change_quantity(form_data: ImmutableMultiDict) -> None:
     else:
         result = validation_quantity(new_quantity)
         if result:
-            product_info = form_data.get('product_info').split('_')
-            product_id = int(product_info[0])
-            location_id = int(product_info[1])
+            inventory_id = form_data.get('inventory_id')
             query_result = change_quantity_product_in_inventory(
-                int(new_quantity), product_id, location_id
+                int(new_quantity), inventory_id
             )
             if query_result.get('status'):
                 flash('Количество товара на складе успешно изменено')

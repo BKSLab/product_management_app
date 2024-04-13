@@ -40,43 +40,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно для добавления товара на склад -->
-    <div class="modal fade" id="add_product_to_warehouse" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Добавление товара на склад</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form method="post" id="inventory">
-              <div class="form-group select">
-                <label for="exampleFormControlSelect1">Выберите локацию</label>
-                <select class="form-control" id="exampleFormControlSelect1" name="location_info" required>
-                  {% for location in context.result_location %}
-                    <option>{{ location.id }} - {{ location.name }}</option>
-                    {% endfor %}
-                </select>
-              </div>
-              
-              <div class="form-group input">
-                <label for="quantity" class="col-form-label">Количество товара</label>
-                <input type="number" min="1" class="form-control" id="quantity" name="quantity" placeholder="1" required>
-              </div>
-             
-              <div class="modal-footer">
-                <input type="hidden" class="hidden-input" name="product_id" value="">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-                <button type="submit" class="btn btn-primary" data-target="#add_product_to_warehouse">Добавить</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Модальное окно для добавления нового товара -->
     <div class="modal fade" id="add_new_product" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -160,7 +123,7 @@
                   Вы действительно хотите удалить товар со склада?
                 </label>
                 <div class="modal-footer">
-                  <input type="hidden" class="hidden-input" name="product_info" value="">
+                  <input type="hidden" class="hidden-input" name="inventory_id" value="">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
                   <button type="submit" class="btn btn-danger" data-target="#del_product_to_warehouse">Удалить</button>
                 </div>
@@ -191,7 +154,7 @@
               <input type="number" min="0" class="form-control" id="quantity" name="new_quantity"  placeholder="0" required>
             </div>
               <div class="modal-footer">
-                <input type="hidden" class="hidden-input" name="product_info" value="">
+                <input type="hidden" class="hidden-input" name="inventory_id" value="">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
                 <button type="submit" class="btn btn-primary" data-target="#change_quantity_products">Изменить</button>
               </div>
@@ -202,6 +165,52 @@
     </div>
 
 
+    <!-- Модальное окно для добавления товара на склад. Версия 2.0 -->
+    <div class="modal fade" id="add_new_product_stock" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Добавление товара на склад</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form method="post" id="inventory">
+              <div class="form-group select">
+                <label for="exampleFormControlSelect1">Выберите товар</label>
+                <select class="form-control" id="exampleFormControlSelect1" name="product_id" required>
+                  {% for product in context.product %}
+                    <option value={{product.id}}>{{ product.name }} (цена {{ product.price }} за единицу товара)  </option>
+                    {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group select">
+                <label for="exampleFormControlSelect1">Выберите локацию склада</label>
+                <select class="form-control" id="exampleFormControlSelect1" name="location_id" required>
+                  {% for location in context.location %}
+                    <option value={{ location.id }}> {{ location.name }}</option>
+                    {% endfor %}
+                </select>
+              </div>
+
+
+              <div class="form-group input">
+                <label for="quantity" class="col-form-label">Укажите количество товара</label>
+                <input type="number" min="1" class="form-control" id="quantity" name="quantity" placeholder="1" required>
+              </div>
+             
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary" data-target="#add_new_product_stock">Добавить на склад</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h1>{{ context.title }}</h1>
     <div>
       <div style="float: left;">
@@ -209,6 +218,9 @@
       </div>
       <div style="float: left;">
         <button type="button" class="btn btn-outline-secondary" aria-pressed="true" data-toggle="modal" data-target="#add_new_location">Добавить новую локацию</button>
+      </div>
+      <div style="float: left;">
+        <button type="button" class="btn btn-outline-secondary" aria-pressed="true" data-toggle="modal" data-target="#add_new_product_stock">Добавить товар на склад</button>
       </div>
       <div style="float: left;">
         <form method="post" id="search" class="form-inline">
@@ -225,7 +237,8 @@
         <div class="col-auto my-1">
           <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" name="sort">
             <option selected>выберите вариант сортировки</option>
-            <option value="1">по цене</option>
+            <option value="1">по возрастанию цены</option>
+            <option value="2">по убыванию цены</option>
           </select>
         </div>
     
@@ -240,38 +253,33 @@
         <tr>
           <th scope="col">Наименование товара</th>
           <th scope="col">Описание товара</th>
-          <th scope="col">Цена за единицу товара</th>
           <th scope="col">Место хранения</th>
+          <th scope="col">Цена за единицу товара</th>
           <th scope="col">Количество</th>
+          <th scope="col">На общую сумму</th>
           <th scope="col">Действие</th>
         </tr>
       </thead>
-      {% for product in context.result %}
+      {% for inventory in context.inventory %}
       <tbody>
         <tr>
-          <td>{{ product.name }}</td>
-          <td>{{ product.description }}</td>
-          <td>{{ product.price}}</td>
-          {% if product.inventories %}
-          <td>{{ product.inventories.0.locations.name }}</td>
+          <td>{{ inventory.products.name }}</td>
+          <td>{{ inventory.products.description }}</td>
+          <td>{{ inventory.locations.name }}</td>
+          <td>{{ inventory.products.price }} </td>
           <td>
-            <button type="button" class="btn btn-link" data-info="{{ product.id }}_{{product.inventories.0.location_id}}" data-toggle="modal" data-target="#change_quantity_products">{{ product.inventories.0.quantity }}</button>
+            <button type="button" class="btn btn-link" data-info="{{ inventory.id }}" data-toggle="modal" data-target="#change_quantity_products">{{ inventory.quantity }}</button>
           </td>
-          {% else %}
-          <td>Товар не на складе</td>
-          <td>Товар не на складе</td>
-          {% endif %}
+          <td>{{ inventory.products.price * inventory.quantity}} </td>
           <td>
-            {% if product.inventories %}
-            <button type="button" class="btn btn-outline-danger btn-sm" data-info="{{ product.id }}_{{product.inventories.0.location_id}}" data-toggle="modal" data-target="#del_product_to_warehouse">Удалить со склада</button>
-            {% else %}
-            <button type="button" class="btn btn-outline-success btn-sm" data-id={{ product.id }} data-toggle="modal" data-target="#add_product_to_warehouse">Добавить на склад</button>
-            {% endif %}
+            <button type="button" class="btn btn-outline-danger btn-sm" data-info={{ inventory.id }} data-toggle="modal" data-target="#del_product_to_warehouse">Удалить со склада</button>
           </td>
         </tr>
       </tbody>
       {% endfor %}
     </table>
+
+
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
       integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"

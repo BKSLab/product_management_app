@@ -1,4 +1,3 @@
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -92,20 +91,11 @@ def add_product_to_inventory(
     }
 
 
-def del_product_from_inventory(product_id: int, location_id: int):
+def del_product_from_inventory(inventory_id: str):
     """Функция удаления товара со склада."""
     with Session(autoflush=False, bind=engine) as session:
         try:
-            instance = (
-                session.query(Inventory)
-                .filter(
-                    and_(
-                        Inventory.product_id == product_id,
-                        Inventory.location_id == location_id,
-                    )
-                )
-                .first()
-            )
+            instance = session.get(Inventory, inventory_id)
             session.delete(instance)
             session.commit()
         except IntegrityError as error:
@@ -120,22 +110,12 @@ def del_product_from_inventory(product_id: int, location_id: int):
 
 def change_quantity_product_in_inventory(
     new_quantity: int,
-    product_id: int,
-    location_id: int,
+    inventory_id: int,
 ):
     """Изменение количества товара на складе."""
     with Session(autoflush=False, bind=engine) as session:
         try:
-            instance = (
-                session.query(Inventory)
-                .filter(
-                    and_(
-                        Inventory.product_id == product_id,
-                        Inventory.location_id == location_id,
-                    )
-                )
-                .first()
-            )
+            instance = session.get(Inventory, inventory_id)
             instance.quantity = new_quantity
             session.commit()
         except IntegrityError as error:

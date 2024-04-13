@@ -13,10 +13,9 @@ def validation_product(name: str, description: str, price: str) -> bool:
 
 
 def validation_inventory(
-    location_info: str, quantity: str, product_id: str
+    location_id: str, quantity: str, product_id: str
 ) -> bool:
     """Функция валидации данных о новом товаре при добавлении на склад."""
-    location_id = location_info.split()[0]
     return (
         isinstance(location_id, str)
         and isinstance(quantity, str)
@@ -28,18 +27,12 @@ def validation_inventory(
     )
 
 
-def validation_product_and_location_id(product_info: str) -> bool:
+def validation_inventory_id(inventory_id: str) -> bool:
     """
-    Функция валидации id товара и локации нахождения товара при его удалении.
+    Функция валидации id записи о товаре,
+    добавленном на склад при его удалении.
     """
-    product_id = product_info[0]
-    location_id = product_info[1]
-    return (
-        isinstance(product_id, str)
-        and product_id.isdigit()
-        and isinstance(location_id, str)
-        and location_id.isdigit()
-    )
+    return isinstance(inventory_id, str) and inventory_id.isdigit()
 
 
 def validation_quantity(quantity: str) -> bool:

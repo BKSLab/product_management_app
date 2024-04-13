@@ -39,9 +39,7 @@ class Product(BaseModel):
     )
     description = Column(Text, comment='Описание продукции')
     price = Column(Numeric(precision=10, scale=2), comment='Цена продукции')
-    inventories = relationship(
-        'Inventory', back_populates='product', lazy='joined'
-    )
+    inventories = relationship('Inventory', back_populates='products')
 
     def __repr__(self) -> str:
         return f'Товар: {self.name} по цене: {self.price}'
@@ -70,7 +68,9 @@ class Inventory(BaseModel):
 
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.id'))
-    product = relationship('Product', back_populates='inventories')
+    products = relationship(
+        'Product', back_populates='inventories', lazy='joined'
+    )
     location_id = Column(Integer, ForeignKey('location.id'))
     locations = relationship(
         'Location', back_populates='inventories', lazy='joined'
