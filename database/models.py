@@ -26,6 +26,19 @@ class BaseModel(DeclarativeBase):
     """Определение базовой модели."""
 
 
+class Unit(BaseModel):
+    """Модель для хранения данных об единицах измерения товаров.."""
+
+    __tablename__ = 'units'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(length=5), comment='Единицы измерения', unique=True)
+    products = relationship('Product', back_populates='units')
+
+    def __repr__(self) -> str:
+        return f'Единица измерения товара: {self.name}'
+
+
 class Product(BaseModel):
     """Модель для хранения данных о товарах."""
 
@@ -38,7 +51,9 @@ class Product(BaseModel):
         unique=True,
     )
     description = Column(Text, comment='Описание продукции')
-    price = Column(Numeric(precision=10, scale=2), comment='Цена продукции')
+    price = Column(Numeric(precision=18, scale=2), comment='Цена продукции')
+    unit_id = Column(Integer, ForeignKey('units.id'))
+    units = relationship('Unit', back_populates='products', lazy='joined')
     inventories = relationship('Inventory', back_populates='products')
 
     def __repr__(self) -> str:
@@ -48,7 +63,7 @@ class Product(BaseModel):
 class Location(BaseModel):
     """Модель для хранения данных о локациях."""
 
-    __tablename__ = 'location'
+    __tablename__ = 'locations'
 
     id = Column(Integer, primary_key=True)
     name = Column(
@@ -71,12 +86,12 @@ class Inventory(BaseModel):
     products = relationship(
         'Product', back_populates='inventories', lazy='joined'
     )
-    location_id = Column(Integer, ForeignKey('location.id'))
+    location_id = Column(Integer, ForeignKey('locations.id'))
     locations = relationship(
         'Location', back_populates='inventories', lazy='joined'
     )
     quantity = Column(
-        Integer, comment='Количество продукции в месте ее хранения'
+        Numeric(precision=18, scale=3), comment='Количество товара'
     )
 
     def __repr__(self) -> str:

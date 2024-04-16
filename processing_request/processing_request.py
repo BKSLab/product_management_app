@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from flask import flash, request
 from werkzeug.datastructures.structures import ImmutableMultiDict
 
@@ -9,12 +11,12 @@ from database.data_operations import (
     del_product_from_inventory,
     get_object_by_id,
 )
-from database.models import Location, Product
+from database.models import Location, Product, Unit
 from form_validation.form_validation import (
     validation_inventory,
+    validation_inventory_id,
     validation_location,
     validation_product,
-    validation_inventory_id,
     validation_quantity,
 )
 
@@ -47,10 +49,12 @@ def processing_request_add_product(form_data: ImmutableMultiDict) -> None:
     name = form_data.get('product_name')
     description = form_data.get('product_description')
     price = form_data.get('product_price')
-    result = validation_product(name, description, price)
+    unit_id = form_data.get('unit_id')
+    result = validation_product(name, description, unit_id)
     if result:
+        unit_instance = get_object_by_id(model=Unit, id=int(unit_id))
         query_result = add_product(
-            name, description, float(price.replace(',', '.'))
+            name, description, Decimal(price.replace(',', '.')), unit_instance
         )
         if query_result.get('status'):
             flash(f'{query_result.get("product")} успешно добавлен')
@@ -85,12 +89,15 @@ def processing_request_add_product_to_inventory(
         )
         if product_instance and location_instance:
             query_result = add_product_to_inventory(
-                product_instance, location_instance, int(quantity)
+                product_instance,
+                location_instance,
+                Decimal(quantity.replace(',', '.')),
             )
             if query_result.get('status'):
+                inventory_instance = query_result.get('instance')
                 flash(
-                    f'{product_instance.name} успешно добавлен '
-                    f'на склад в {location_instance.name}'
+                    f'Товар {inventory_instance.products.name} '
+                    'успешно добавлен!'
                 )
             else:
                 flash(

@@ -1,13 +1,23 @@
+from decimal import Decimal
+
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from database.models import BaseModel, Inventory, Location, Product, engine
+from database.models import (
+    BaseModel,
+    Inventory,
+    Location,
+    Product,
+    Unit,
+    engine,
+)
 
 
 def add_product(
     product_name: str,
     product_description: str,
-    product_price: float,
+    product_price: Decimal,
+    unit: Unit,
 ) -> dict:
     """Добавление товара"""
     with Session(autoflush=False, bind=engine) as session:
@@ -16,6 +26,7 @@ def add_product(
                 name=product_name,
                 description=product_description,
                 price=product_price,
+                unit_id=unit.id,
             )
             session.add(new_product)
             session.commit()
@@ -67,7 +78,7 @@ def get_object_by_id(model: BaseModel, id: int):
 def add_product_to_inventory(
     product: Product,
     location: Location,
-    quantity: int,
+    quantity: Decimal,
 ):
     """Функция добавления товара на склад."""
     with Session(autoflush=False, bind=engine) as session:
@@ -87,7 +98,7 @@ def add_product_to_inventory(
         instance = session.get(Inventory, inventory_record.id)
     return {
         'status': True,
-        'inventory_record': instance,
+        'instance': instance,
     }
 
 

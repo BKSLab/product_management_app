@@ -62,6 +62,13 @@
 
                 <label for="product-description" class="col-form-label">Описание товара</label>
                 <input type="text" class="form-control" id="product-description" name="product_description" placeholder="введите описание товара" required>
+                
+                <label for="exampleFormControlSelect1">Выберите единицу измерения</label>
+                <select class="form-control" id="exampleFormControlSelect1" name="unit_id" required>
+                  {% for unit in context.units %}
+                    <option value={{unit.id}}>{{ unit.name }}</option>
+                  {% endfor %}
+                </select>
 
                 <label for="product-price" class="col-form-label">Цена за единицу товара</label>
                 <input type="text" min="0" class="form-control" id="product-price" name="product_price" placeholder="0" required>
@@ -181,8 +188,8 @@
                 <label for="exampleFormControlSelect1">Выберите товар</label>
                 <select class="form-control" id="exampleFormControlSelect1" name="product_id" required>
                   {% for product in context.product %}
-                    <option value={{product.id}}>{{ product.name }} (цена {{ product.price }} за единицу товара)  </option>
-                    {% endfor %}
+                    <option value={{product.id}}>{{ product.name }} (цена {{ product.price }} за {{ product.units.name }})  </option>
+                  {% endfor %}
                 </select>
               </div>
 
@@ -191,14 +198,13 @@
                 <select class="form-control" id="exampleFormControlSelect1" name="location_id" required>
                   {% for location in context.location %}
                     <option value={{ location.id }}> {{ location.name }}</option>
-                    {% endfor %}
+                  {% endfor %}
                 </select>
               </div>
 
-
               <div class="form-group input">
                 <label for="quantity" class="col-form-label">Укажите количество товара</label>
-                <input type="number" min="1" class="form-control" id="quantity" name="quantity" placeholder="1" required>
+                <input type="text" min="1" class="form-control" id="quantity" name="quantity" placeholder="1" required>
               </div>
              
               <div class="modal-footer">
@@ -248,12 +254,13 @@
       </div>
     </form>
   
-    <table class="table table-hover">
-      <thead>
+    <table class="table table-hover table-sm">
+      <thead class="thead-dark">
         <tr>
-          <th scope="col">Наименование товара</th>
-          <th scope="col">Описание товара</th>
+          <th scope="col">Товар</th>
+          <th scope="col">Описание</th>
           <th scope="col">Место хранения</th>
+          <th scope="col">Ед. измерения</th>
           <th scope="col">Цена за единицу товара</th>
           <th scope="col">Количество</th>
           <th scope="col">На общую сумму</th>
@@ -266,11 +273,12 @@
           <td>{{ inventory.products.name }}</td>
           <td>{{ inventory.products.description }}</td>
           <td>{{ inventory.locations.name }}</td>
+          <td>{{ inventory.products.units.name }}</td>
           <td>{{ inventory.products.price }} </td>
           <td>
             <button type="button" class="btn btn-link" data-info="{{ inventory.id }}" data-toggle="modal" data-target="#change_quantity_products">{{ inventory.quantity }}</button>
           </td>
-          <td>{{ inventory.products.price * inventory.quantity}} </td>
+          <td>{{ inventory.products.price | total_cost_calculation (inventory.quantity) }} </td>
           <td>
             <button type="button" class="btn btn-outline-danger btn-sm" data-info={{ inventory.id }} data-toggle="modal" data-target="#del_product_to_warehouse">Удалить со склада</button>
           </td>

@@ -1,9 +1,11 @@
 import sys
 
 from pymysql import connect
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from config.config import configuration_data
-from database.models import BaseModel, engine
+from database.models import BaseModel, Unit, engine
 
 
 def create_database():
@@ -31,6 +33,30 @@ def create_tables() -> None:
         print('Таблицы успешно созданы!')
     except Exception as error:
         print(f'При создании таблиц произошла ошибка: {error}')
+
+
+def add_units():
+    """Функция добавления новой локации."""
+    units = [
+        'кг',
+        'шт',
+        'м',
+        'м\u00B2',
+        'м\u00B3',
+        'л',
+    ]
+    with Session(autoflush=False, bind=engine) as session:
+        try:
+            for unit in units:
+                instance = Unit(name=unit)
+                session.add(instance)
+                session.commit()
+        except SQLAlchemyError as error:
+            print(
+                'Придобавлении данных об единицах измерения '
+                f'произошла ошибка: {error}'
+            )
+        print('Данные в таблицу units успешно добавлены')
 
 
 name = sys.argv[1]

@@ -55,13 +55,17 @@ product_management_app позволяет:
 
     	python database_management.py create_tables
 
-10. Подгрузите данные в таблицы из файла dump-product_management_db-202404131337.sql
+10. Добавьте информацию об используемых единицах измерения:
+        
+        python database_management.py add_units
 
-11. Запустите проект:
+11. Подгрузите данные в таблицы из файла dump-product_management_db-202404131337.sql
+
+12. Запустите проект:
 
     	flask --app app run
 
-12. После запуска проекта он будет доступен по адресу:
+13. После запуска проекта он будет доступен по адресу:
 	
         http://127.0.0.1:5000/
 

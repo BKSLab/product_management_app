@@ -3,12 +3,13 @@ def validation_location(location: str) -> bool:
     return isinstance(location, str) and len(location) <= 50
 
 
-def validation_product(name: str, description: str, price: str) -> bool:
+def validation_product(name: str, description: str, unit_id: str) -> bool:
     """Функция валидации данных о новом товаре."""
     return (
         isinstance(name, str)
         and len(name) <= 50
         and isinstance(description, str)
+        and unit_id.isdigit()
     )
 
 
@@ -21,9 +22,8 @@ def validation_inventory(
         and isinstance(quantity, str)
         and isinstance(product_id, str)
         and location_id.isdigit()
-        and quantity.isdigit()
         and product_id.isdigit()
-        and int(quantity) > 0
+        and float(quantity) > 0
     )
 
 

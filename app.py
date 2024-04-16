@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request
+from jinja2 import environment
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from config.config import configuration_data
-from database.models import Inventory, Location, Product, engine
+from database.models import Inventory, Location, Product, Unit, engine
 from processing_request.processing_request import (
     processing_request_add_location,
     processing_request_add_product,
@@ -11,10 +12,14 @@ from processing_request.processing_request import (
     processing_request_change_quantity,
     processing_request_del_product_from_inventory,
 )
+from utils.utils import total_cost_calculation
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = configuration_data.secret_key.get_secret_value()
 app.config['DEBUG'] = configuration_data.debug
+
+
+environment.DEFAULT_FILTERS['total_cost_calculation'] = total_cost_calculation
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -40,7 +45,7 @@ def index():
         ):
             processing_request_add_product_to_inventory(request.form)
         if set(
-            ['product_name', 'product_description', 'product_price']
+            ['product_name', 'product_description', 'product_price', 'unit_id']
         ) == set(request.form.keys()):
             processing_request_add_product(request.form)
         if 'location' in request.form.keys():
@@ -80,10 +85,10 @@ def index():
         inventory = (
             Session(autoflush=False, bind=engine).query(Inventory).all()
         )
-
     context = {
         'title': title,
         'inventory': inventory,
+        'units': (Session(autoflush=False, bind=engine).query(Unit).all()),
         'product': (
             Session(autoflush=False, bind=engine).query(Product).all()
         ),
